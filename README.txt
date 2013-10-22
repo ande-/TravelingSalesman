@@ -1,0 +1,2 @@
+The Traveling Salesman program picks a number of cities from those listed in a file and calculates (brute-force, through all permutations) the shortest route, starting and ending with Albany.  The GUI is updated with a picture of the shortest route found so far and the progress bar with the progress towards verifying the shortest route.  The user can stop the calculation at any time or generate a different set of random cities.  The main class is Machine.
+All the code is written by Andrea Houg except for the PermutationGenerator.
