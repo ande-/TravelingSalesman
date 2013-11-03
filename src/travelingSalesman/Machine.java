@@ -43,6 +43,7 @@ public class Machine extends JFrame {
 	//for finding shortest rout
 	private Thread thread;
 	private City[] shortestRoute;
+	private static volatile boolean stopRequested = false;
 
 	//gui-related fields
 	private DrawCanvas canvas;
@@ -50,6 +51,13 @@ public class Machine extends JFrame {
 	private JTextField field = new JTextField();
 	private String message;
 
+	public static synchronized void requestStop(){
+		stopRequested = true;
+	}
+	
+	public static synchronized boolean stopRequested(){
+		return stopRequested;
+	}
 	public static void main(String[] args) {
 		//cities must be picked before the GUI is set up
 		cities = pickCities(numCities-1); 
@@ -115,6 +123,9 @@ public class Machine extends JFrame {
 
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				stopRequested = false;
+				
+				
 				if(thread == null || !thread.isAlive()) {
 					thread = new Thread(new Pathfinder());
 					thread.start();
@@ -125,10 +136,9 @@ public class Machine extends JFrame {
 		});
 
 		stopButton.addActionListener(new ActionListener() {
-			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {	
 				if(thread!= null) {
-					thread.stop();
+					stopRequested = true;
 					field.setText("Terminated");
 					progressBar.setValue(0);
 
@@ -137,11 +147,10 @@ public class Machine extends JFrame {
 		});
 
 		newCitiesButton.addActionListener(new ActionListener() {
-			@SuppressWarnings("deprecation")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(thread!= null) {
-					thread.stop();
+					stopRequested = true;
 					field.setText("");
 					progressBar.setValue(0);
 
@@ -172,15 +181,18 @@ public class Machine extends JFrame {
 			int progress = 0;
 			double shortestDistance = Double.POSITIVE_INFINITY;
 			for(int i = 0; i<length; i++) {
+				if(stopRequested == true) break;
 				double totalDistance = 0;
 				City[] route = new City[numCities+1];
 				int[] perm = gen.getNext();
 				for(int index : perm) {
+					if(stopRequested == true) break;
 					route[index] = cities.get(perm[index]);
 				}
 				route[route.length-1] = cities.get(0); //end up at Albany. 
 
 				for(int city = 0; city<route.length-1; city++) {
+					if(stopRequested == true) break;
 					City from = route[city];
 					City to = route[city+1];
 					totalDistance += from.calculateDistance(to);
@@ -195,10 +207,11 @@ public class Machine extends JFrame {
 				canvas.repaint();
 
 			}
-
-			message = "Best route:";
-			for(City city : shortestRoute) {
-				message += " "+city.getName()+" ";
+			if(!stopRequested) {
+				message = "Best route:";
+				for(City city : shortestRoute) {
+					message += " "+city.getName()+" ";
+				}
 			}
 			field.setText(message);
 		}
