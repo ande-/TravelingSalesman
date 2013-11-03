@@ -181,18 +181,18 @@ public class Machine extends JFrame {
 			int progress = 0;
 			double shortestDistance = Double.POSITIVE_INFINITY;
 			for(int i = 0; i<length; i++) {
-				if(stopRequested == true) break;
+				if(stopRequested) break;
 				double totalDistance = 0;
 				City[] route = new City[numCities+1];
 				int[] perm = gen.getNext();
 				for(int index : perm) {
-					if(stopRequested == true) break;
+					if(stopRequested) break;
 					route[index] = cities.get(perm[index]);
 				}
 				route[route.length-1] = cities.get(0); //end up at Albany. 
 
 				for(int city = 0; city<route.length-1; city++) {
-					if(stopRequested == true) break;
+					if(stopRequested) break;
 					City from = route[city];
 					City to = route[city+1];
 					totalDistance += from.calculateDistance(to);
